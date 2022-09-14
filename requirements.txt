@@ -1,0 +1,11 @@
+# requirements
+numpy == 1.23.1
+pyusb == 1.2.1
+
+# dev
+black == 22.6.0
+tomli == 2.0.1
+pytest == 7.1.2
+
+# test
+hypothesis == 6.54.4
