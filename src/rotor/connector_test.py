@@ -1,7 +1,7 @@
 from time import sleep
 import serial
 
-import arduino_connector
+from arduino_connector import ArduinoConnector
 
 
 def send_and_await_resp(device: serial.Serial, message: str) -> str:
@@ -13,7 +13,8 @@ def send_and_await_resp(device: serial.Serial, message: str) -> str:
 
 
 if __name__ == "__main__":
-    device = arduino_connector.ArduinoConnector.connect_on_port("COM3")
+
+    device = ArduinoConnector.connect_on_port("COM3")
 
     while True:
         print("move to 45")
