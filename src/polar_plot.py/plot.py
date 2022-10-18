@@ -1,17 +1,18 @@
+# import numpy and matplotlib library
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-r = np.arange(0, 2, 0.01)
-array_x = [x % 100 for x in range (360)] 
-array_y = [x for x in range (360)]
+plt.axes(projection="polar")
 
-fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
-ax.plot(array_x, array_y)
-ax.set_rmax(2)
-ax.set_rticks([0.5, 1, 1.5, 2])  # Less radial ticks
-ax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line
-ax.grid(True)
 
-ax.set_title("A line plot on a polar axis", va='bottom')
-plt.savefig(ax.get_title() + '.pdf')
+rads = np.arange(0, (2 * np.pi), 0.01)
+rs = np.arange(0, (2 * np.pi), 0.01)
+
+
+# plotting the circle
+for i, r in zip(rads, rs):
+    plt.polar(i, r, "g.")
+
+# display the Polar plot
+plt.savefig("polat_plot.pdf")
