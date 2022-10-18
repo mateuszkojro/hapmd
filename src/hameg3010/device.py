@@ -1,15 +1,12 @@
-from time import sleep
 from typing import Any
 import usb.core
 import usb.util
 import logging
 
-from requests.base_request import Request
-
 
 class Device:
-    def __init__(self, device) -> None:
-        self.device = device
+    def __init__(self, device: usb.core.Device) -> None:
+        self.device: usb.core.Device = device
         self.device.set_configuration()
 
     @staticmethod
@@ -29,13 +26,13 @@ class Device:
 
         if command is None or len(command) == 0:
             raise ValueError(f"cmd has to be not empty string, received: {command}")
-        
+
         # commands send to device must end with terminal character
         if command[-1] != "\n":
             command += "\n"
-            
+
         logging.debug(f"writing to device, message: {command}")
-        
+
         try:
             self.device.write(0x2, command)
         except Exception:
@@ -43,43 +40,29 @@ class Device:
             raise
 
     def _await_resp(self):
-        resp = self.device.read(0x81, 1_000_000, 1_000)
-        
+
+        resp = self.device.read(0x81, 1000, 1_000)
+
         # Following lines are hack
         # problem seems to be that after sending message multiple readout are required to get response
         # the delay between readouts is not important, can be as short as 0.1 s
         # seems like a problem with buffer somewhere, following while statement waits for non-empty readout
         # thus avoiding the issue, this will come back tho
         # TODO find the source of this problem
-        
+
         counter = 0
         while len(resp) == 2:
-            
-            sleep(0.2)
-            resp = self.device.read(0x81, 1_000_000, 1_000)
+
+            resp = self.device.read(0x81, resp, 1_000)
             # print(resp)
             counter += 1
             if counter > 10:
                 break
-        
+
         try:
             return (resp, bytearray(resp).decode("utf-8"))
         except Exception as ex:
             return (resp, f"fail with error message: {str(ex)}")
-
-    def _handle_request(self, cmd: Request):
-
-        self._send_str(command=cmd._send())
-        
-        if cmd.mode == Request.Mode.SETTER:
-            return None
-        
-        _, decoded = self._await_resp()
-        
-        if "fail" in decoded:
-            raise Exception("fali reading response") 
-        
-        return cmd._receive(decoded)
 
     def _handle_str(self, cmd: str):
 
@@ -89,10 +72,6 @@ class Device:
 
         return (resp, decoded)
 
-    def send_await_resp(self, cmd: Any) -> Any:
+    def send_await_resp(self, cmd: str) -> Any:
 
-        if isinstance(cmd, Request):
-            return self._handle_request(cmd)
-
-        if isinstance(cmd, str):
-            return self._handle_str(cmd)
+        return self._handle_str(cmd)
