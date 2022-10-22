@@ -1,12 +1,13 @@
+from sqlite3 import connect
 from device import Device
 
 
 if __name__ == "__main__":
-    hameg_device_handle = Device.connect_using_vid_pid(
-        idVendor=0x0403, idProduct=0xED72
-    )
     print(
         """
+        
+        
+        
  /$$   /$$                                                    /$$$$$$  /$$$$$$
 | $$  | $$                                                   /$$__  $$|_  $$_/
 | $$  | $$  /$$$$$$  /$$$$$$/$$$$   /$$$$$$   /$$$$$$       | $$  \__/  | $$  
@@ -19,8 +20,11 @@ if __name__ == "__main__":
                                             |  $$$$$$/                        
                                              \______/                         """
     )
-    print("by me")
-
+    
+    hameg_device_handle = Device.connect_using_vid_pid(
+        idVendor=0x0403, idProduct=0xED72
+    )    
+    
     while True:
         x = input("command: ")
         resp = hameg_device_handle.send_await_resp(x)

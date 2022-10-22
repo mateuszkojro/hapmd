@@ -30,7 +30,7 @@ class Device:
         # commands send to device must end with terminal character
         if command[-1] != "\n":
             command += "\n"
-
+            
         logging.debug(f"writing to device, message: {command}")
 
         try:
@@ -41,7 +41,7 @@ class Device:
 
     def _await_resp(self):
 
-        resp = self.device.read(0x81, 1000, 1_000)
+        resp = self.device.read(0x81, 1_000_000, 1_000)
 
         # Following lines are hack
         # problem seems to be that after sending message multiple readout are required to get response
@@ -53,7 +53,7 @@ class Device:
         counter = 0
         while len(resp) == 2:
 
-            resp = self.device.read(0x81, resp, 1_000)
+            resp = self.device.read(0x81, 1_000_000, 1_000)
             # print(resp)
             counter += 1
             if counter > 10:
@@ -61,17 +61,14 @@ class Device:
 
         try:
             return (resp, bytearray(resp).decode("utf-8"))
+        
         except Exception as ex:
             return (resp, f"fail with error message: {str(ex)}")
 
-    def _handle_str(self, cmd: str):
-
-        self._send_str(command=cmd)
+    def send_await_resp(self, cmd: str) -> Any:
+        if len(cmd) != 0: 
+            self._send_str(command=cmd)
 
         resp, decoded = self._await_resp()
 
         return (resp, decoded)
-
-    def send_await_resp(self, cmd: str) -> Any:
-
-        return self._handle_str(cmd)
