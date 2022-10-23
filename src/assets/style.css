@@ -1,0 +1,21 @@
+body {
+    margin: 0;
+    background-color: dimgray;
+}
+
+.device_info {
+    background-color: #262626;
+    width: 50;
+    padding: 20px;
+    display: "table-cell"
+}
+
+.text {
+    text-align: left;
+    color: #7FDBFF
+}
+
+.header_text {
+    text-align: center;
+    color: #7FDBFF
+}
