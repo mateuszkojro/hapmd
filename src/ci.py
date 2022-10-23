@@ -13,9 +13,13 @@ class ConnectionState(Enum):
 
 
 def format_stats(
-    rotor_state: ConnectionState,
-    hameg_state: ConnectionState,
+    rotor_state: str,
+    hameg_state: str,
     current_rotor_angle: float,
+    sweep_min_frequency: float,
+    sweep_max_frequency: float,
+    sweep_step: float,
+    measurement_time: float,
 ):
     print(f"Rotor connection: {rotor_state}")
     print(f"Hameg3010 connection: {hameg_state}")
@@ -25,16 +29,14 @@ def format_stats(
 
 if __name__ == "__main__":
     print(
-        """
- /$$   /$$  /$$$$$$  /$$$$$$$  /$$      /$$ /$$$$$$$ 
-| $$  | $$ /$$__  $$| $$__  $$| $$$    /$$$| $$__  $$
-| $$  | $$| $$  \ $$| $$  \ $$| $$$$  /$$$$| $$  \ $$
-| $$$$$$$$| $$$$$$$$| $$$$$$$/| $$ $$/$$ $$| $$  | $$
-| $$__  $$| $$__  $$| $$____/ | $$  $$$| $$| $$  | $$
-| $$  | $$| $$  | $$| $$      | $$\  $ | $$| $$  | $$
-| $$  | $$| $$  | $$| $$      | $$ \/  | $$| $$$$$$$/
-|__/  |__/|__/  |__/|__/      |__/     |__/|_______/ 
-        """
+        """ 
+ /$$   /$$  /$$$$$$  /$$$$$$$  /$$      /$$ /$$$$$$$         /$$$$$$  /$$$$$$
+| $$  | $$ /$$__  $$| $$__  $$| $$$    /$$$| $$__  $$       /$$__  $$|_  $$_/
+| $$  | $$| $$  \ $$| $$  \ $$| $$$$  /$$$$| $$  \ $$      | $$  \__/  | $$  
+| $$$$$$$$| $$$$$$$$| $$$$$$$/| $$ $$/$$ $$| $$  | $$      | $$        | $$  
+| $$__  $$| $$__  $$| $$____/ | $$  $$$| $$| $$  | $$      | $$        | $$  
+| $$  | $$| $$  | $$| $$      | $$\  $ | $$| $$  | $$      | $$    $$  | $$  
+| $$  | $$| $$  | $$| $$      | $$ \/  | $$| $$$$$$$/      |  $$$$$$/ /$$$$$$
+|__/  |__/|__/  |__/|__/      |__/     |__/|_______/        \______/ |______/"""
     )
     print("Horizontal antenna pattern measurement device")
-    print("piotr223@github")
