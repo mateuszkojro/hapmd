@@ -24,9 +24,19 @@ if __name__ == "__main__":
     hameg_device_handle = Device.connect_using_vid_pid(
         idVendor=0x0403, idProduct=0xED72
     )    
-    
+
+    print(f"""
+Connected to Hameg device
+IDN              : {hameg_device_handle.send_await_resp("*IDN?")[1][2:-1]}
+Software Version : {hameg_device_handle.send_await_resp("SYSTem:SOFTware?")[1][2:-1]}
+Hardware Version : {hameg_device_handle.send_await_resp("SYSTem:HARDware?")[1][2:-1]}
+          """)
+    # clean errors
+    hameg_device_handle.send_await_resp('SYSTem:ERRor:ALL?')
+        
     while True:
-        x = input("command: ")
+        x = input("\ncommand:  ")
         resp = hameg_device_handle.send_await_resp(x)
-        print(f"response: {resp[0]}")
-        print(f"          {resp[1]}")
+        print(f"response: {resp[1]}")
+        # print(f"          {resp[1]}")
+        print(f"errors:   {hameg_device_handle.send_await_resp('SYSTem:ERRor:ALL?')[1][2:-1]}")
