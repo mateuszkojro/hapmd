@@ -1,6 +1,7 @@
 # requirements
 numpy == 1.23.1
 pyusb == 1.2.1
+dash == 2.6.2
 
 # dev
 black == 22.6.0
