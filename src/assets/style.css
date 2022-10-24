@@ -10,12 +10,28 @@ body {
     display: "table-cell"
 }
 
-.text {
-    text-align: left;
+H3 {
+    text-align: center;
+    color: #7FDBFF
+}
+
+p {
+    text-align: center;
     color: #7FDBFF
 }
 
 .header_text {
     text-align: center;
     color: #7FDBFF
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.device_grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 20px;
 }
