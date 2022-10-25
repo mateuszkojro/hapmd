@@ -100,10 +100,19 @@ app.layout = html.Div(
                 ),
             ],
         ),
+                html.Button('START MEASUREMENT', id='start_stop_measurement', n_clicks=0),
     ],
 )
 
-
+@app.callback(
+    Output('start_stop_measurement', "children"),
+    Input('start_stop_measurement', "n_clicks"),
+)
+def start_stop_measurement_button(n_clicks):
+    if n_clicks % 2 == 0:
+        return "START MEASUREMENT bla bla bla bla"
+    else:
+        return "STOP"
 @app.callback(
     Output("hameg_connection", "children"),
     Output("hameg_state", "children"),
