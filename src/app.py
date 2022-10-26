@@ -1,5 +1,3 @@
-from sre_parse import State
-import time
 from dash import Dash, html, dcc
 from dash.dependencies import Output, Input, State
 
@@ -150,7 +148,7 @@ app.layout = html.Div(
                 ),
             ],
         ),
-        html.Button("START MEASUREMENT", id="start_stop_measurement", n_clicks=0),
+        html.Button("Butt", id="start_stop_measurement", n_clicks=0),
     ],
 )
 
@@ -162,10 +160,12 @@ app.layout = html.Div(
     State("step_measurement_cycles","children")
 )
 def start_stop_measurement_button(n_clicks, hameg_measurement_time,step_measurement_cycles):
+    if not hameg_measurement_time or not step_measurement_cycles:
+        return f"Start Simulation total time of measurement is unknown"
     if n_clicks % 2 == 0:
-        return "START MEASUREMENT bla bla bla bla"
+        return f"Start Simulation total time of measurement: {hameg_measurement_time*step_measurement_cycles}h"
     else:
-        return "STOP"
+        return f"'{step_measurement_cycles}'"
 
 
 @app.callback(
