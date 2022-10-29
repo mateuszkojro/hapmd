@@ -88,23 +88,39 @@ void setup()
   Serial.begin(115200);
   Serial.print("arduino_ok\n");
 }
-/*
 
-supported commands:
-
-| command | arguments | answer |
---------------------------------
-| get     | - | angle as float |
-| set     | angle as float | - |
-
-*/
-
+String handle_set(String &message)
+{
+  auto argument = message.substring(0, message.length() - 1);
+  auto new_angle = argument.toFloat();
+  int no_steps_to_move = (new_angle - current_angle) / step_angle;
+  if (no_steps_to_move < 0)
+  {
+    stepper_motor.SetDirection(A4988::Direction::CCW);
+    no_steps_to_move *= -1;
+  }
+  else
+  {
+    stepper_motor.SetDirection(A4988::Direction::CW);
+  }
+  stepper_motor.Step(no_steps_to_move);
+  current_angle = new_angle;
+  return String(current_angle) + "\n";
+}
 void loop()
 {
   auto message = Serial.readStringUntil('\n');
-  message.trim(); // deletes all leading and trailing whitespaces
-  message.replace("\n", "");
+  while (message.length() == 0)
+  {
+    message = Serial.readStringUntil('\n');
+    message.trim(); // deletes all leading and trailing whitespaces
+    message.replace("\n", "");
+  }
+
+  auto message_copy = message;
+
   auto command = message.substring(0, 3);
+
   String response;
 
   if (command == "get")
@@ -113,24 +129,16 @@ void loop()
   }
   else if (command == "set")
   {
-    auto argument = message.substring(0, message.length() - 1);
-    auto new_angle = argument.toFloat();
-    int no_steps_to_move = (new_angle - current_angle) / step_angle;
-    if (no_steps_to_move < 0)
-    {
-      stepper_motor.SetDirection(A4988::Direction::CCW);
-      no_steps_to_move *= -1;
-    }
-    else
-    {
-      stepper_motor.SetDirection(A4988::Direction::CW);
-    }
-    stepper_motor.Step(no_steps_to_move);
-    response = String(current_angle) + "\n";
+    auto value = message.substring(3, message.length() - 1);
+    response = handle_set(command);
+  }
+  else if (command == "con")
+  {
+    response = "ok\n";
   }
   else
   {
-    response = String("failed to intepret the input\n");
+    response = String("failed to intepret the input>" + message_copy + "<\n");
   }
   Serial.print(response);
 }
