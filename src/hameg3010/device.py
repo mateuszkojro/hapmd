@@ -30,7 +30,7 @@ class Device:
         # commands send to device must end with terminal character
         if command[-1] != "\n":
             command += "\n"
-            
+
         logging.debug(f"writing to device, message: {command}")
 
         try:
@@ -61,12 +61,12 @@ class Device:
 
         try:
             return (resp, bytearray(resp).decode("utf-8"))
-        
+
         except Exception as ex:
             return (resp, f"fail with error message: {str(ex)}")
 
     def send_await_resp(self, cmd: str) -> Any:
-        if len(cmd) != 0: 
+        if len(cmd) != 0:
             self._send_str(command=cmd)
 
         resp, decoded = self._await_resp()

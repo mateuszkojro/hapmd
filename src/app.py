@@ -139,7 +139,6 @@ app.layout = html.Div(
                                     [
                                         html.Td(html.H3("Step Measurement cycles")),
                                         html.Td(html.P(id="step_measurement_cycles")),
-                                        
                                     ]
                                 ),
                             ]
@@ -156,10 +155,12 @@ app.layout = html.Div(
 @app.callback(
     Output("start_stop_measurement", "children"),
     Input("start_stop_measurement", "n_clicks"),
-    State("hameg_measurement_time","children"),
-    State("step_measurement_cycles","children")
+    State("hameg_measurement_time", "children"),
+    State("step_measurement_cycles", "children"),
 )
-def start_stop_measurement_button(n_clicks, hameg_measurement_time,step_measurement_cycles):
+def start_stop_measurement_button(
+    n_clicks, hameg_measurement_time, step_measurement_cycles
+):
     if not hameg_measurement_time or not step_measurement_cycles:
         return f"Start Simulation total time of measurement is unknown"
     if n_clicks % 2 == 0:
@@ -235,7 +236,7 @@ def callback_a(
         # rotor_min_angle,
         # rotor_max_angle,
         # rotor_angle_step,
-        step_measurement_cycles
+        step_measurement_cycles,
     )
 
 
