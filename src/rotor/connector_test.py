@@ -1,24 +1,28 @@
-from time import sleep
-import serial
 
 from arduino_connector import ArduinoConnector
 
-
-def send_and_await_resp(device: serial.Serial, message: str) -> str:
-    if message[-1] != "\n":
-        message += "\n"
-    device.write(bytes(message, "utf-8"))
-    resp = str(device.readline())
-    return resp
-
-
 if __name__ == "__main__":
-
-    device = ArduinoConnector.connect_on_port("COM3")
-
+    print("""
+ /$$$$$$$              /$$                                /$$$$$$  /$$$$$$
+| $$__  $$            | $$                               /$$__  $$|_  $$_/
+| $$  \ $$  /$$$$$$  /$$$$$$    /$$$$$$   /$$$$$$       | $$  \__/  | $$  
+| $$$$$$$/ /$$__  $$|_  $$_/   /$$__  $$ /$$__  $$      | $$        | $$  
+| $$__  $$| $$  \ $$  | $$    | $$  \ $$| $$  \__/      | $$        | $$  
+| $$  \ $$| $$  | $$  | $$ /$$| $$  | $$| $$            | $$    $$  | $$  
+| $$  | $$|  $$$$$$/  |  $$$$/|  $$$$$$/| $$            |  $$$$$$/ /$$$$$$
+|__/  |__/ \______/    \___/   \______/ |__/             \______/ |______/
+          """)
+    port:str = "COM3"
+    device = ArduinoConnector.connect_on_port(port)
+    print("Arduino device set up: OK")
+    print(f"Connection Port: {port}")
+    print(f"Current angle: {device.get_angle()}")
+    
     while True:
-        print("move to 45")
-        device.move_by(90)
-        sleep(3)
-        print("move to -180")
-        device.move_by(-180)
+        new_angle = input("command: ")
+        if new_angle == "":
+            print(device.check_connection())
+        elif new_angle == " ":
+            print(device.get_angle())
+        else:
+            device.move_to(float(new_angle))
