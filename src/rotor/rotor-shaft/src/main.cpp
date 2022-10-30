@@ -83,13 +83,12 @@ protected:
 float step_angle = 360.f / 200.f; // default change in angle, when rotated by one step
 float current_angle = 0;
 A4988 stepper_motor(6, 8);
-void setup()
-{
-  Serial.begin(115200);
-  Serial.print("arduino_ok\n");
-}
+String response;
+String message;
+String command;
+String message_copy;
 
-String handle_set(String &message)
+String handle_set(const String &message)
 {
   auto new_angle = message.toFloat();
   int no_steps_to_move = (new_angle - current_angle) / step_angle;
@@ -103,24 +102,27 @@ String handle_set(String &message)
     stepper_motor.SetDirection(A4988::Direction::CW);
   }
   stepper_motor.Step(no_steps_to_move);
-  current_angle = new_angle;
-  return String(message);
+  current_angle = current_angle + (no_steps_to_move * step_angle);
+  return String(current_angle);
+}
+void setup()
+{
+  Serial.begin(115200);
+  Serial.print("arduino_ok\n");
 }
 void loop()
 {
-  auto message = Serial.readStringUntil('\n');
+  message = Serial.readStringUntil('\n');
   while (message.length() == 0)
   {
     message = Serial.readStringUntil('\n');
-    // message.trim(); // deletes all leading and trailing whitespaces
+    message.trim(); // deletes all leading and trailing whitespaces
     message.replace("\n", "");
   }
 
-  auto message_copy = message;
+  message_copy = message;
 
-  auto command = message.substring(0, 3);
-
-  String response;
+  command = message.substring(0, 3);
 
   if (command == "get")
   {
@@ -128,12 +130,11 @@ void loop()
   }
   else if (command == "set")
   {
-    auto value = message.substring(3);
-    response = handle_set(value);
+    response = handle_set(message.substring(3));
   }
   else if (command == "con")
   {
-    response = "ok>" + message + "<";
+    response = "arduino_ok";
   }
   else
   {
