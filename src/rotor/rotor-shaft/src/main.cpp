@@ -91,8 +91,7 @@ void setup()
 
 String handle_set(String &message)
 {
-  auto argument = message.substring(0, message.length() - 1);
-  auto new_angle = argument.toFloat();
+  auto new_angle = message.toFloat();
   int no_steps_to_move = (new_angle - current_angle) / step_angle;
   if (no_steps_to_move < 0)
   {
@@ -105,7 +104,7 @@ String handle_set(String &message)
   }
   stepper_motor.Step(no_steps_to_move);
   current_angle = new_angle;
-  return String(current_angle) + "\n";
+  return String(message);
 }
 void loop()
 {
@@ -113,7 +112,7 @@ void loop()
   while (message.length() == 0)
   {
     message = Serial.readStringUntil('\n');
-    message.trim(); // deletes all leading and trailing whitespaces
+    // message.trim(); // deletes all leading and trailing whitespaces
     message.replace("\n", "");
   }
 
@@ -125,20 +124,20 @@ void loop()
 
   if (command == "get")
   {
-    response = String(current_angle) + "\n";
+    response = String(current_angle) + "";
   }
   else if (command == "set")
   {
-    auto value = message.substring(3, message.length() - 1);
-    response = handle_set(command);
+    auto value = message.substring(3);
+    response = handle_set(value);
   }
   else if (command == "con")
   {
-    response = "ok\n";
+    response = "ok>" + message + "<";
   }
   else
   {
-    response = String("failed to intepret the input>" + message_copy + "<\n");
+    response = String("failed to intepret the input>" + message_copy + "<");
   }
-  Serial.print(response);
+  Serial.print(response + "\n");
 }

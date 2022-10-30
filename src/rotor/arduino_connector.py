@@ -27,8 +27,10 @@ class ArduinoConnector:
         return ArduinoConnector(device = Serial(port=port, baudrate=baudrate, timeout=30))
 
     def move_to(self, new_angle: float) -> None:
-        send_and_await_resp(device=self._device, message='set' + str(new_angle))
-        self._angle =  new_angle
+        
+        resp = send_and_await_resp(device=self._device, message='set' + str(new_angle))
+        self._angle = new_angle
+        return resp
 
     def move_by(self, angle_step: float) -> None:
         self.move_to(self._angle + angle_step)
@@ -40,7 +42,7 @@ class ArduinoConnector:
     def check_connection(self) -> Union[bool, Tuple[bool, str]]:
         raw_resp , resp = send_and_await_resp(device=self._device, message="con")
         if "ok" in resp:
-            return (True, None)
+            return (True, raw_resp)
         return (False, raw_resp)
     
     @property

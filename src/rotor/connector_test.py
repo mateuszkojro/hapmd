@@ -25,4 +25,4 @@ if __name__ == "__main__":
         elif new_angle == " ":
             print(device.get_angle())
         else:
-            device.move_to(float(new_angle))
+            print(device.move_to(float(new_angle)))
