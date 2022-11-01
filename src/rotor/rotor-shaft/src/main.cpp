@@ -8,7 +8,6 @@ String response;
 String message;
 String command;
 String message_copy;
-
 String handle_set(const String &message)
 {
   auto new_angle = message.toFloat();
@@ -16,14 +15,15 @@ String handle_set(const String &message)
   if (no_steps_to_move < 0)
   {
     stepper_motor.SetDirection(A4988::Direction::CCW);
-    no_steps_to_move *= -1;
   }
   else
   {
     stepper_motor.SetDirection(A4988::Direction::CW);
   }
-  stepper_motor.Step(no_steps_to_move);
+  stepper_motor.Step(abs(no_steps_to_move));
+
   current_angle = current_angle + (no_steps_to_move * step_angle);
+
   return String(current_angle);
 }
 void setup()
