@@ -1,4 +1,5 @@
 import math
+from random import random
 from typing import Any
 import logging
 
@@ -15,7 +16,7 @@ class DeviceMock:
         return DeviceMock()
     
     def func(self):
-        return math.sin(self.current_frequency / 1_000_000) * 4
+        return math.sin(self.current_frequency) * random()
     
     def send_await_resp(self, cmd: str) -> Any:
         cmd = cmd.casefold()    
@@ -30,7 +31,7 @@ class DeviceMock:
         elif cmd == "rmode:frequency?":
             return (f"1'{self.current_frequency}",f"1'{self.current_frequency}\n")
         elif cmd == "rmode:level?":
-            return (f"1'{self.func()}",f"{self.func()}")
+            return (f"1'{self.func()}",f"1'{self.func()}\n")
         elif "rmode:frequency" in cmd:
             self.current_frequency = float(cmd[15:])
         elif "system:mode" in cmd:
