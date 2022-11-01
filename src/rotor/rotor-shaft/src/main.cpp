@@ -57,6 +57,11 @@ void loop()
   {
     response = "arduino_ok";
   }
+  else if (command == "ovr")
+  {
+    current_angle = message.toFloat();
+    response = String(current_angle);
+  }
   else
   {
     response = String("failed to intepret the input>" + message_copy + "<");
