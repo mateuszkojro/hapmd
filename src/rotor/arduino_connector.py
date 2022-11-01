@@ -33,7 +33,12 @@ class ArduinoConnector:
 
     def move_by(self, angle_step: float) -> float:
         return self.move_to(self._angle + angle_step)
-        
+    
+    def override_angle(self, new_angle:float)->float:
+        raw_resp, resp = send_and_await_resp(device=self._device, message='ovr' + str(new_angle))
+        self._angle = float(resp)
+        return self._angle
+    
     def get_angle(self)->float:
         _ , resp = send_and_await_resp(device=self._device, message="get")
         self._angle = float(resp)
