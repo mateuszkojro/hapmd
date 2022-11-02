@@ -7,6 +7,8 @@ import logging
 class DeviceMock:
     current_frequency = 1_000_000
     receiver_mode = "RMODE"
+    freq_value_mapping = {}
+    
     def __init__(self) -> None:
         pass
     
@@ -16,7 +18,18 @@ class DeviceMock:
         return DeviceMock()
     
     def func(self):
-        return math.sin(self.current_frequency) * random()
+        if self.current_frequency not in self.freq_value_mapping.keys():
+            self.freq_value_mapping[self.current_frequency] = -1 * random()*100
+        
+        new_value = self.freq_value_mapping[self.current_frequency]
+        
+        if new_value > -80:
+            new_value = new_value + 0.1*new_value
+        else :  
+            new_value = new_value - 0.1*new_value
+        self.freq_value_mapping[self.current_frequency] = new_value
+        
+        return new_value
     
     def send_await_resp(self, cmd: str) -> Any:
         cmd = cmd.casefold()    
