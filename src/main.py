@@ -12,6 +12,7 @@ class Colors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+
 import json
 from typing import Union
 import pandas as pd
@@ -20,8 +21,6 @@ from hameg3010.hameg_mock import DeviceMock
 from rotor.arduino_connector_mock import ArduinoConnectorMock
 from rotor.arduino_connector import ArduinoConnector
 from pydantic import BaseModel, StrictInt, StrictFloat, Field, StrictStr
-import numpy as np
-import matplotlib.pyplot as plt
 
 Numeric = Union[StrictFloat,StrictInt]
 
@@ -32,12 +31,12 @@ class HapmdConfig(BaseModel):
     hameg_pid : StrictInt = Field(default=0xED72)
     hameg_sweep_time : Numeric = Field(default=0.001)
     hameg_sweep_min_frequency :Numeric = Field(default=1_000_000)
-    hameg_sweep_max_frequency:Numeric= Field(default=2_000_000)
-    hameg_frequency_step: Numeric = Field(default=10_000)
+    hameg_sweep_max_frequency:Numeric= Field(default=1_001_000)
+    hameg_frequency_step: Numeric = Field(default=100)
     rotor_com_port:StrictStr = Field(default="COM3")
     rotor_min_angle: Numeric = Field(default=-90)
     rotor_max_angle: Numeric = Field(default=90)
-    rotor_angle_step: Numeric = Field(default=15)
+    rotor_angle_step: Numeric = Field(default=1)
 
     config_json_file_path: StrictStr = Field(default=None)
     
@@ -137,20 +136,24 @@ def hameg_console_loop(hameg_handle:Union[Device,DeviceMock]):
             
 def measurement_loop(hapmd_config:HapmdConfig, hameg_handle:Union[Device,DeviceMock], rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock])->pd.DataFrame:
     measurement = []
-    angles = [angle for angle in range(hapmd_config.rotor_min_angle,hapmd_config.rotor_max_angle,hapmd_config.rotor_angle_step)]
+    indexes = []
     frequencies = [frequency for frequency in range(hapmd_config.hameg_sweep_min_frequency,hapmd_config.hameg_sweep_max_frequency, hapmd_config.hameg_frequency_step)] 
-    print(f"Measurement start no Angle states: {len(angles)} no Frequency states: {len(frequencies)}")
-    for angle in angles:
+    print(f"Measurement start no Angle states: {(hapmd_config.rotor_max_angle -hapmd_config.rotor_min_angle) // hapmd_config.rotor_angle_step} no Frequency states: {len(frequencies)}")
+    
+    angle = hapmd_config.rotor_min_angle
+    while angle <= hapmd_config.rotor_max_angle:
+        angle = angle + hapmd_config.rotor_angle_step
         rotor_handle.move_to(angle)
         angle = rotor_handle.angle
         sweep = []
+        indexes.append(angle)
         print(f"current angle: {angle}")
         for frequency in frequencies:
             hameg_handle.send_await_resp(f"rmode:frequency {frequency}")
-            level = hameg_handle.send_await_resp("rmode:level?")[1][2:-1]            
+            level = hameg_handle.send_await_resp("rmode:level?")[1][2:-1]
             sweep.append(float(level))
         measurement.append(sweep)
-    measurement_df = pd.DataFrame(measurement,columns=frequencies,index=angles) 
+    measurement_df = pd.DataFrame(measurement,columns=frequencies,index=indexes) 
     return measurement_df
 
 if __name__ == "__main__":
