@@ -1,6 +1,6 @@
 from typing import Union
 from device import Device
-from hameg3010.device_mock import DeviceMock
+from device_mock import DeviceMock
 
 def hameg_console_loop(hameg_handle:Union[Device,DeviceMock]):
     while True:
@@ -33,7 +33,7 @@ if __name__ == "__main__":
                                              \______/                         """
     )
 
-    hameg_device_handle = Device.connect_using_vid_pid(
+    hameg_device_handle = DeviceMock.connect_using_vid_pid(
         idVendor=0x0403, idProduct=0xED72
     )
 
