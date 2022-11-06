@@ -1,6 +1,21 @@
+from typing import Union
 from device import Device
+from hameg3010.device_mock import DeviceMock
 
-
+def hameg_console_loop(hameg_handle:Union[Device,DeviceMock]):
+    while True:
+        command = input("hameg> ")
+        command = command.casefold()
+        command = command.replace(" ","")
+        if command in ("quit", 'q'):
+            return
+        else:
+            resp = hameg_handle.send_await_resp(command)
+            print(f"response: {resp[1]}")
+            print(
+                f"errors:   {hameg_handle.send_await_resp('SYSTem:ERRor:ALL?')[1][2:-1]}"
+            )
+            
 if __name__ == "__main__":
     print(
         """
@@ -32,12 +47,5 @@ Hardware Version : {hameg_device_handle.send_await_resp("SYSTem:HARDware?")[1][2
     )
     # clean errors
     hameg_device_handle.send_await_resp("SYSTem:ERRor:ALL?")
-
-    while True:
-        x = input("\ncommand:  ")
-        resp = hameg_device_handle.send_await_resp(x)
-        print(f"response: {resp[1]}")
-        # print(f"          {resp[1]}")
-        print(
-            f"errors:   {hameg_device_handle.send_await_resp('SYSTem:ERRor:ALL?')[1][2:-1]}"
-        )
+    
+    hameg_console_loop(hameg_device_handle)
