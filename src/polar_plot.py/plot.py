@@ -9,14 +9,16 @@ measurement = pd.read_csv("output.csv")
 measurement = measurement.set_index(measurement.columns[0])
 
 
-plt.axes(projection="polar",)
+plt.axes(
+    projection="polar",
+)
 # plt.set_theta_zero_lsocation("N")
 fig = plt.figure()
-ax = fig.add_subplot(projection='polar')
+ax = fig.add_subplot(projection="polar")
 
 color = iter(cm.rainbow(np.linspace(0, 1, len(measurement.columns))))
 
-ax.set_theta_zero_location('N')
+ax.set_theta_zero_location("N")
 for idx, freq in enumerate(measurement.columns):
     current_color = next(color)
     for angle in measurement.index:
@@ -25,13 +27,15 @@ for idx, freq in enumerate(measurement.columns):
         else:
             theta = angle
         theta = math.radians(theta)
-        ax.scatter(theta, measurement.at[angle,freq], color = current_color, s=0.5,  alpha = 0.4)
+        ax.scatter(
+            theta, measurement.at[angle, freq], color=current_color, s=0.5, alpha=0.4
+        )
 
 
 no_labels = len(ax.yaxis.get_ticklabels())
 for n, label in enumerate(ax.yaxis.get_ticklabels()):
-    if n % (no_labels//5) != 0:
-        label.set_visible(False)        
+    if n % (no_labels // 5) != 0:
+        label.set_visible(False)
 
 ax.yaxis.get_ticklabels()[-1].set_visible(True)
 
