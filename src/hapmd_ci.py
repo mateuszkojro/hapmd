@@ -2,13 +2,14 @@
     entry point for application
 """
 
+import sys
 import datetime
 from typing import Optional, Union
 import pandas as pd
-import numpy as np
 
 from hameg3010.device import Device
 from hameg3010.device_mock import DeviceMock
+from hameg_scripts import level
 
 from rotor.arduino_connector import ArduinoConnector
 from rotor.arduino_connector_mock import ArduinoConnectorMock
@@ -38,34 +39,6 @@ def hapmd_console_loop(
             rotor_console_loop(rotor_handle)
         elif command == "hameg>":
             hameg_console_loop(hameg_handle)
-        elif command == "show":
-            hapmd_config.print_config()
-        elif "hameg_vid" in command:
-            hapmd_config.hameg_vid = int(command[len("hameg_vid") :])
-        elif "hameg_pid" in command:
-            hapmd_config.hameg_pid = int(command[len("hameg_pid") :])
-        elif "hameg_sweep_time" in command:
-            hapmd_config.hameg_sweep_time = float(command[len("hameg_sweep_time") :])
-        elif "hameg_sweep_min_frequency" in command:
-            hapmd_config.hameg_sweep_min_frequency = float(
-                command[len("hameg_sweep_min_frequency") :]
-            )
-        elif "hameg_sweep_max_frequency" in command:
-            hapmd_config.hameg_sweep_max_frequency = float(
-                command[len("hameg_sweep_max_frequency") :]
-            )
-        elif "hameg_frequency_step" in command:
-            hapmd_config.hameg_frequency_step = float(
-                command[len("hameg_frequency_step") :]
-            )
-        elif "rotor_com_port" in command:
-            hapmd_config.rotor_com_port = float(command[len("rotor_com_port") :])
-        elif "rotor_max_angle" in command:
-            hapmd_config.rotor_max_angle = float(command[len("rotor_max_angle") :])
-        elif "rotor_min_angle" in command:
-            hapmd_config.rotor_min_angle = float(command[len("rotor_min_angle") :])
-        elif "rotor_angle_step" in command:
-            hapmd_config.rotor_angle_step = float(command[len("rotor_angle_step") :])
         else:
             print(f"{Colors.FAIL}unknown command:{Colors.BOLD}'{command}'{Colors.ENDC}")
 
@@ -75,23 +48,14 @@ def measurement_loop(
     hameg_handle: Union[Device, DeviceMock],
     rotor_handle: Union[ArduinoConnector, ArduinoConnectorMock],
 ) -> pd.DataFrame:
-    measurement = []
-    indexes = []
-
-    frequencies = [
-        frequency
-        for frequency in range(
-            hapmd_config.hameg_sweep_min_frequency,
-            hapmd_config.hameg_sweep_max_frequency,
-            hapmd_config.hameg_frequency_step,
-        )
-    ]
-
     print(
         f"Measurement no Angle states: {(hapmd_config.rotor_max_angle -hapmd_config.rotor_min_angle) // hapmd_config.rotor_angle_step} no Frequency states: {len(frequencies)}"
     )
 
+    measurement = []
+    indexes = []
     angle = hapmd_config.rotor_min_angle
+    
     while angle <= hapmd_config.rotor_max_angle:
         angle = angle + hapmd_config.rotor_angle_step
         rotor_handle.move_to(angle)
@@ -99,22 +63,13 @@ def measurement_loop(
         sweep = []
         indexes.append(angle)
         print(f"current angle: {angle}")
-        for frequency in frequencies:
-            
-            hameg_handle.send_await_resp(f"rmode:frequency {frequency}")
-            level_raw: str = hameg_handle.send_await_resp("rmode:level?")[1][2:-1]
-            
-            try:
-                level = level_raw[level_raw.find(",") + 1 :]
-                sweep.append(float(level))
-                
-            except Exception as ex:
-                print(Colors.FAIL + f"Encountered Error: {str(ex)}" + Colors.ENDC)
-                print(level_raw)
-                sweep.append(np.NaN)
-
+        
+        for frequency in hapmd_config.hameg_frequencies:
+            sweep.append(level(hameg_device,frequency))
         measurement.append(sweep)
-    measurement_df = pd.DataFrame(measurement, columns=frequencies, index=indexes)
+        
+    measurement_df = pd.DataFrame(measurement, columns=hapmd_config.hameg_frequencies, index=indexes)
+    
     return measurement_df
 
 
@@ -160,7 +115,6 @@ def set_up_rotor_device(
 
     return rotor_device
 
-import sys
 
 if __name__ == "__main__":
     
