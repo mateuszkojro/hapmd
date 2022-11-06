@@ -1,5 +1,5 @@
 import math
-from random import random
+import random
 from typing import Any
 import logging
 
@@ -19,15 +19,20 @@ class DeviceMock:
     
     def func(self):
         if self.current_frequency not in self.freq_value_mapping.keys():
-            self.freq_value_mapping[self.current_frequency] = -1 * random()*100
+            self.freq_value_mapping[self.current_frequency] = random.random() * math.pi
         
-        new_value = self.freq_value_mapping[self.current_frequency]
+        new_value = math.sin(self.freq_value_mapping[self.current_frequency])*35 - 40
+        self.freq_value_mapping[self.current_frequency] += 0.025
         
-        if new_value > -80:
-            new_value = new_value + 0.1*new_value
-        else :  
-            new_value = new_value - 0.1*new_value
-        self.freq_value_mapping[self.current_frequency] = new_value
+        # if new_value < -80:
+        #     new_value = new_value + (0.1*new_value)
+        # elif new_value > -10:
+        #     new_value = new_value - (0.1*new_value)
+        # elif random.random() < 0.5:  
+        #     new_value = new_value + (0.1*new_value)
+        # else:
+        #     new_value = new_value - (0.1*new_value)
+        
         
         return new_value
     
@@ -44,7 +49,7 @@ class DeviceMock:
         elif cmd == "rmode:frequency?":
             return (f"1'{self.current_frequency}",f"1'{self.current_frequency}\n")
         elif cmd == "rmode:level?":
-            return (f"1'{self.func()}",f"1'{self.func()}\n")
+            return (f"1'{self.current_frequency},{self.func()}",f"1'{self.current_frequency},{self.func()}\n")
         elif "rmode:frequency" in cmd:
             self.current_frequency = float(cmd[15:])
         elif "system:mode" in cmd:
