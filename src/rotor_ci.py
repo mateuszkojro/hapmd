@@ -1,35 +1,40 @@
-
 from typing import Union
-import os, sys
-from arduino_connector import ArduinoConnector
-from arduino_connector_mock import ArduinoConnectorMock
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# import ../db.py
-from ci_colors import Colors
+
+from rotor.arduino_connector import ArduinoConnector
+from rotor.arduino_connector_mock import ArduinoConnectorMock
+from assets.ci_colors import Colors
 
 
-def rotor_console_loop(rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock]):
+# import os, sys
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+def rotor_console_loop(rotor_handle: Union[ArduinoConnector, ArduinoConnectorMock]):
     while True:
         command = input("rotor> ")
         command = command.casefold()
-        command = command.replace(" ","")
-        if command in ("quit", 'q'):
+        command = command.replace(" ", "")
+        if command in ("quit", "q"):
             return
-        
+
         elif command in ("connection?", "c?"):
             print(rotor_handle.check_connection())
-            
-        elif command in ("angle?","a?"):
+
+        elif command in ("angle?", "a?"):
             print(rotor_handle.get_angle())
-        
+
         else:
             try:
                 print(rotor_handle.move_to(float(command)))
             except Exception as ex:
-                print(f"{Colors.FAIL}unknown command:{Colors.BOLD}'{command}'{Colors.ENDC}")
+                print(
+                    f"{Colors.FAIL}unknown command:{Colors.BOLD}'{command}'{Colors.ENDC}"
+                )
+
 
 if __name__ == "__main__":
-    print("""
+    print(
+        """
  /$$$$$$$              /$$                                /$$$$$$  /$$$$$$
 | $$__  $$            | $$                               /$$__  $$|_  $$_/
 | $$  \ $$  /$$$$$$  /$$$$$$    /$$$$$$   /$$$$$$       | $$  \__/  | $$  
@@ -38,11 +43,12 @@ if __name__ == "__main__":
 | $$  \ $$| $$  | $$  | $$ /$$| $$  | $$| $$            | $$    $$  | $$  
 | $$  | $$|  $$$$$$/  |  $$$$/|  $$$$$$/| $$            |  $$$$$$/ /$$$$$$
 |__/  |__/ \______/    \___/   \______/ |__/             \______/ |______/
-          """)
-    port:str = "COM3"
+          """
+    )
+    port: str = "COM3"
     device = ArduinoConnectorMock.connect_on_port(port)
-    print("Arduino device set up: "+Colors.OKGREEN+Colors.BOLD+"OK"+Colors.ENDC)
+    print("Arduino device set up: " + Colors.OKGREEN + Colors.BOLD + "OK" + Colors.ENDC)
     print(f"Connection Port: {Colors.BOLD}{port}{Colors.ENDC}")
     print(f"Current angle: {Colors.BOLD}{device.get_angle()}{Colors.ENDC}")
-    
+
     rotor_console_loop(device)

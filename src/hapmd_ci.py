@@ -3,8 +3,7 @@
 """
 
 import datetime
-import json
-from typing import List, Union
+from typing import Optional, Union
 import pandas as pd
 import numpy as np
 
@@ -14,102 +13,84 @@ from hameg3010.device_mock import DeviceMock
 from rotor.arduino_connector import ArduinoConnector
 from rotor.arduino_connector_mock import ArduinoConnectorMock
 
-from pydantic import BaseModel, StrictInt, StrictFloat, Field, StrictStr
-from ci_colors import Colors
+from assets.ci_colors import Colors
 
-from rotor.rotor_ci import rotor_console_loop
-Numeric = Union[StrictFloat,StrictInt]
+from rotor_ci import rotor_console_loop
+from hameg_ci import hameg_console_loop
 
-class HapmdConfig(BaseModel):
-
-    # hameg device must have specified sweep range
-    hameg_vid : StrictInt = Field(default=0x0403)
-    hameg_pid : StrictInt = Field(default=0xED72)
-    hameg_sweep_time : Numeric = Field(default=0.001)
-    
-    hameg_sweep_min_frequency :Numeric = Field(default=1_000_000)
-    hameg_sweep_max_frequency:Numeric= Field(default=1_001_000)
-    hameg_frequency_step: Numeric = Field(default=100)
-
-    hameg_frequencies:List[Numeric] = Field(default=None)
-    
-    rotor_com_port:StrictStr = Field(default="COM3")
-    rotor_min_angle: Numeric = Field(default=-110)
-    rotor_max_angle: Numeric = Field(default=110)
-    rotor_angle_step: Numeric = Field(default=0.5)
-
-    config_json_file_path: StrictStr = Field(default=None)
-    
-    @staticmethod
-    def from_json_config_file(file_path : StrictStr)->"HapmdConfig":
-        with open(file_path) as f:
-            data = json.load(f) 
-        config = HapmdConfig(**data)
-        config.config_json_file_path = file_path
-        return config
+from hampd_config import HapmdConfig
 
 
-    def print_config(self:"HapmdConfig"):
-        print(f"""
-Connecting Hameg Device on VID: {Colors.BOLD}{hex(self.hameg_vid)}{Colors.ENDC} 
-Connecting Hameg Device on PID: {Colors.BOLD}{hex(self.hameg_pid)}{Colors.ENDC}
-Sweep Time: {Colors.BOLD}{self.hameg_sweep_time}{Colors.ENDC} s              
-Frequency Step: {Colors.BOLD}{self.hameg_frequency_step}{Colors.ENDC} Hz
-Sweep Start Frequency: {Colors.BOLD}{'{:.3e}'.format(self.hameg_sweep_min_frequency)}{Colors.ENDC} Hz 
-Sweep Stop Frequency: {Colors.BOLD}{'{:.3e}'.format(self.hameg_sweep_max_frequency)}{Colors.ENDC} Hz
-
-Connecting Rotor Device on Com port: {Colors.BOLD}{self.rotor_com_port}{Colors.ENDC}
-Rotor Step Angle: {Colors.BOLD}{self.rotor_angle_step}{Colors.ENDC}
-Rotor Start Angle: {Colors.BOLD}{self.rotor_min_angle}{Colors.ENDC}          
-Stop Angle: {Colors.BOLD}{self.rotor_min_angle}{Colors.ENDC}
-""")
-    
-def hapmd_console_loop(hapmd_config:HapmdConfig, hameg_handle:Union[Device,DeviceMock], rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock]):
+def hapmd_console_loop(
+    hapmd_config: HapmdConfig,
+    hameg_handle: Union[Device, DeviceMock],
+    rotor_handle: Union[ArduinoConnector, ArduinoConnectorMock],
+):
     while True:
         command = input("hampd> ")
         command = command.casefold()
-        command = command.replace(" ","")
+        command = command.replace(" ", "")
         if command == "start":
             return
         elif command == "hampd>":
             continue
         elif command == "rotor>":
-            rotor_console_loop(rotor_handle)    
+            rotor_console_loop(rotor_handle)
         elif command == "hameg>":
             hameg_console_loop(hameg_handle)
         elif command == "show":
             hapmd_config.print_config()
         elif "hameg_vid" in command:
-            hapmd_config.hameg_vid = int(command[len("hameg_vid"):])
+            hapmd_config.hameg_vid = int(command[len("hameg_vid") :])
         elif "hameg_pid" in command:
-            hapmd_config.hameg_pid= int(command[len("hameg_pid"):])
+            hapmd_config.hameg_pid = int(command[len("hameg_pid") :])
         elif "hameg_sweep_time" in command:
-            hapmd_config.hameg_sweep_time= float(command[len("hameg_sweep_time"):])
+            hapmd_config.hameg_sweep_time = float(command[len("hameg_sweep_time") :])
         elif "hameg_sweep_min_frequency" in command:
-            hapmd_config.hameg_sweep_min_frequency= float(command[len("hameg_sweep_min_frequency"):])
+            hapmd_config.hameg_sweep_min_frequency = float(
+                command[len("hameg_sweep_min_frequency") :]
+            )
         elif "hameg_sweep_max_frequency" in command:
-            hapmd_config.hameg_sweep_max_frequency= float(command[len("hameg_sweep_max_frequency"):])
+            hapmd_config.hameg_sweep_max_frequency = float(
+                command[len("hameg_sweep_max_frequency") :]
+            )
         elif "hameg_frequency_step" in command:
-            hapmd_config.hameg_frequency_step = float(command[len("hameg_frequency_step"):])
+            hapmd_config.hameg_frequency_step = float(
+                command[len("hameg_frequency_step") :]
+            )
         elif "rotor_com_port" in command:
-            hapmd_config.rotor_com_port= float(command[len("rotor_com_port"):])
+            hapmd_config.rotor_com_port = float(command[len("rotor_com_port") :])
         elif "rotor_max_angle" in command:
-            hapmd_config.rotor_max_angle= float(command[len("rotor_max_angle"):])
+            hapmd_config.rotor_max_angle = float(command[len("rotor_max_angle") :])
         elif "rotor_min_angle" in command:
-            hapmd_config.rotor_min_angle= float(command[len("rotor_min_angle"):])
+            hapmd_config.rotor_min_angle = float(command[len("rotor_min_angle") :])
         elif "rotor_angle_step" in command:
-            hapmd_config.rotor_angle_step= float(command[len("rotor_angle_step"):])
+            hapmd_config.rotor_angle_step = float(command[len("rotor_angle_step") :])
         else:
             print(f"{Colors.FAIL}unknown command:{Colors.BOLD}'{command}'{Colors.ENDC}")
-            
-def measurement_loop(hapmd_config:HapmdConfig, hameg_handle:Union[Device,DeviceMock], rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock])->pd.DataFrame:
+
+
+def measurement_loop(
+    hapmd_config: HapmdConfig,
+    hameg_handle: Union[Device, DeviceMock],
+    rotor_handle: Union[ArduinoConnector, ArduinoConnectorMock],
+) -> pd.DataFrame:
     measurement = []
     indexes = []
-    
-    frequencies = [frequency for frequency in range(hapmd_config.hameg_sweep_min_frequency,hapmd_config.hameg_sweep_max_frequency, hapmd_config.hameg_frequency_step)] 
-    
-    print(f"Measurement no Angle states: {(hapmd_config.rotor_max_angle -hapmd_config.rotor_min_angle) // hapmd_config.rotor_angle_step} no Frequency states: {len(frequencies)}")
-    
+
+    frequencies = [
+        frequency
+        for frequency in range(
+            hapmd_config.hameg_sweep_min_frequency,
+            hapmd_config.hameg_sweep_max_frequency,
+            hapmd_config.hameg_frequency_step,
+        )
+    ]
+
+    print(
+        f"Measurement no Angle states: {(hapmd_config.rotor_max_angle -hapmd_config.rotor_min_angle) // hapmd_config.rotor_angle_step} no Frequency states: {len(frequencies)}"
+    )
+
     angle = hapmd_config.rotor_min_angle
     while angle <= hapmd_config.rotor_max_angle:
         angle = angle + hapmd_config.rotor_angle_step
@@ -119,22 +100,74 @@ def measurement_loop(hapmd_config:HapmdConfig, hameg_handle:Union[Device,DeviceM
         indexes.append(angle)
         print(f"current angle: {angle}")
         for frequency in frequencies:
+            
             hameg_handle.send_await_resp(f"rmode:frequency {frequency}")
-            level_raw:str = hameg_handle.send_await_resp("rmode:level?")[1][2:-1]
+            level_raw: str = hameg_handle.send_await_resp("rmode:level?")[1][2:-1]
+            
             try:
-                level = level_raw[level_raw.find(',') + 1:]
+                level = level_raw[level_raw.find(",") + 1 :]
                 sweep.append(float(level))
+                
             except Exception as ex:
-                print(Colors.FAIL+f"Encountered Error: {str(ex)}"+Colors.ENDC)
+                print(Colors.FAIL + f"Encountered Error: {str(ex)}" + Colors.ENDC)
                 print(level_raw)
                 sweep.append(np.NaN)
-                
-                
+
         measurement.append(sweep)
-    measurement_df = pd.DataFrame(measurement,columns=frequencies,index=indexes) 
+    measurement_df = pd.DataFrame(measurement, columns=frequencies, index=indexes)
     return measurement_df
 
+
+def set_up_hameg_device(
+    hapmd_config: HapmdConfig,
+) -> Optional[Union[Device, DeviceMock]]:
+    try:
+        hameg_device = Device.connect_using_vid_pid(
+            hapmd_config.hameg_vid, hapmd_config.hameg_pid
+        )
+
+        print("Hameg device set up: " + Colors.OKGREEN + "OK" + Colors.ENDC)
+        print(
+            f"""
+IDN              : {Colors.BOLD}{hameg_device.send_await_resp("*IDN?")[1][2:-1]}{Colors.ENDC}
+Software Version : {Colors.BOLD}{hameg_device.send_await_resp("SYSTem:SOFTware?")[1][2:-1]}{Colors.ENDC}
+Hardware Version : {Colors.BOLD}{hameg_device.send_await_resp("SYSTem:HARDware?")[1][2:-1]}{Colors.ENDC}
+            """
+        )
+        # clean errors
+        hameg_device.send_await_resp("SYSTem:ERRor:ALL?")
+
+    except Exception as ex:
+        print("Hameg device set up: " + Colors.FAIL + "FAIL" + Colors.ENDC)
+        print(str(ex))
+        hameg_device = None
+
+    return hameg_device
+
+
+def set_up_rotor_device(
+    hapmd_config: HapmdConfig,
+) -> Optional[Union[ArduinoConnector, ArduinoConnectorMock]]:
+    try:
+        rotor_device = ArduinoConnectorMock.connect_on_port(hapmd_config.rotor_com_port)
+        print("Arduino device set up: " + Colors.OKGREEN + "OK" + Colors.ENDC)
+        print(f"Current angle: {Colors.BOLD}{rotor_device.get_angle()}{Colors.ENDC}")
+
+    except Exception as ex:
+        print("Arduino device set up: " + Colors.FAIL + "FAIL" + Colors.ENDC)
+        print(str(ex))
+        rotor_device = None
+
+    return rotor_device
+
+import sys
+
 if __name__ == "__main__":
+    
+    hapmd_settings_file = None
+    if len(sys.argv) == 2:
+        hapmd_settings_file = str(sys.argv[1])
+
     print(
         """ 
  /$$   /$$  /$$$$$$  /$$$$$$$  /$$      /$$ /$$$$$$$         /$$$$$$  /$$$$$$
@@ -147,37 +180,18 @@ if __name__ == "__main__":
 |__/  |__/|__/  |__/|__/      |__/     |__/|_______/        \______/ |______/"""
     )
     print("Horizontal antenna pattern measurement device")
-    
-    hapmd_config = HapmdConfig()
+    if hapmd_settings_file:
+        hapmd_config = HapmdConfig.from_json_config_file(hapmd_settings_file)
+    else:    
+        hapmd_config = HapmdConfig()
     hapmd_config.print_config()
-    try:
-        hameg_device = Device.connect_using_vid_pid(hapmd_config.hameg_vid,hapmd_config.hameg_pid)
-        print("Hameg device set up: "+Colors.OKGREEN+"OK"+Colors.ENDC)
-        print(f"""
-IDN              : {Colors.BOLD}{hameg_device.send_await_resp("*IDN?")[1][2:-1]}{Colors.ENDC}
-Software Version : {Colors.BOLD}{hameg_device.send_await_resp("SYSTem:SOFTware?")[1][2:-1]}{Colors.ENDC}
-Hardware Version : {Colors.BOLD}{hameg_device.send_await_resp("SYSTem:HARDware?")[1][2:-1]}{Colors.ENDC}
-            """
-        )
-        # clean errors
-        hameg_device.send_await_resp("SYSTem:ERRor:ALL?")
-    except Exception as ex:
-        print("Hameg device set up: "+Colors.FAIL+"FAIL"+Colors.ENDC)
-        print(str(ex))
-        hameg_device = None
-        
-    try:
-        rotor_device = ArduinoConnectorMock.connect_on_port(hapmd_config.rotor_com_port)
-        print("Arduino device set up: "+Colors.OKGREEN+"OK"+Colors.ENDC)
-        print(f"Current angle: {Colors.BOLD}{rotor_device.get_angle()}{Colors.ENDC}")
-    except Exception as ex:
-        print("Arduino device set up: "+Colors.FAIL+"FAIL"+Colors.ENDC)
-        print(str(ex))
-        rotor_device = None
-        
+    hameg_device = set_up_hameg_device(hapmd_config)
+    rotor_device = set_up_rotor_device(hapmd_config)
+
     if not (rotor_device and hameg_device):
         raise SystemExit
-    
-    hapmd_console_loop(hapmd_config,hameg_device,rotor_device)
-    measurement = measurement_loop(hapmd_config,hameg_device,rotor_device).to_csv("output_"+datetime.now().strftime("%d/%m/%Y %H:%M:%S") + ".csv")
 
+    hapmd_console_loop(hapmd_config, hameg_device, rotor_device)
+    measurement = measurement_loop(hapmd_config, hameg_device, rotor_device).to_csv(
+        "output_" + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + ".csv"
+    )
