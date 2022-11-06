@@ -1,8 +1,12 @@
 
 from typing import Union
+import os, sys
 from arduino_connector import ArduinoConnector
-from assets.ci_colors import Colors
-from rotor.arduino_connector_mock import ArduinoConnectorMock
+from arduino_connector_mock import ArduinoConnectorMock
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# import ../db.py
+from ci_colors import Colors
+
 
 def rotor_console_loop(rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock]):
     while True:
@@ -37,8 +41,8 @@ if __name__ == "__main__":
           """)
     port:str = "COM3"
     device = ArduinoConnectorMock.connect_on_port(port)
-    print("Arduino device set up: OK")
-    print(f"Connection Port: {port}")
-    print(f"Current angle: {device.get_angle()}")
+    print("Arduino device set up: "+Colors.OKGREEN+Colors.BOLD+"OK"+Colors.ENDC)
+    print(f"Connection Port: {Colors.BOLD}{port}{Colors.ENDC}")
+    print(f"Current angle: {Colors.BOLD}{device.get_angle()}{Colors.ENDC}")
     
     rotor_console_loop(device)
