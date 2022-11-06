@@ -1,28 +1,23 @@
 """
     entry point for application
 """
-class Colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
-
+import datetime
 import json
 from typing import List, Union
 import pandas as pd
 import numpy as np
-from hameg3010.device import Device
-from hameg3010.hameg_mock import DeviceMock
-from rotor.arduino_connector_mock import ArduinoConnectorMock
-from rotor.arduino_connector import ArduinoConnector
-from pydantic import BaseModel, StrictInt, StrictFloat, Field, StrictStr
 
+from hameg3010.device import Device
+from hameg3010.device_mock import DeviceMock
+
+from rotor.arduino_connector import ArduinoConnector
+from rotor.arduino_connector_mock import ArduinoConnectorMock
+
+from pydantic import BaseModel, StrictInt, StrictFloat, Field, StrictStr
+from ci_colors import Colors
+
+from rotor.rotor_ci import rotor_console_loop
 Numeric = Union[StrictFloat,StrictInt]
 
 class HapmdConfig(BaseModel):
@@ -106,38 +101,6 @@ def hapmd_console_loop(hapmd_config:HapmdConfig, hameg_handle:Union[Device,Devic
             hapmd_config.rotor_angle_step= float(command[len("rotor_angle_step"):])
         else:
             print(f"{Colors.FAIL}unknown command:{Colors.BOLD}'{command}'{Colors.ENDC}")
-def rotor_console_loop(rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock]):
-    while True:
-        command = input("rotor> ")
-        command = command.casefold()
-        command = command.replace(" ","")
-        if command == "quit":
-            return
-        elif command == "":
-            print(rotor_handle.check_connection())
-            
-        elif command == "angle?":
-            print(rotor_handle.get_angle())
-        
-        else:
-            try:
-                print(rotor_handle.move_to(float(command)))
-            except Exception as ex:
-                print(f"{Colors.FAIL}unknown command:{Colors.BOLD}'{command}'{Colors.ENDC}")
-        
-def hameg_console_loop(hameg_handle:Union[Device,DeviceMock]):
-    while True:
-        command = input("hameg> ")
-        command = command.casefold()
-        command = command.replace(" ","")
-        if command == "quit":
-            return
-        else:
-            resp = hameg_handle.send_await_resp(command)
-            print(f"response: {resp[1]}")
-            print(
-                f"errors:   {hameg_handle.send_await_resp('SYSTem:ERRor:ALL?')[1][2:-1]}"
-            )
             
 def measurement_loop(hapmd_config:HapmdConfig, hameg_handle:Union[Device,DeviceMock], rotor_handle:Union[ArduinoConnector,ArduinoConnectorMock])->pd.DataFrame:
     measurement = []
@@ -216,5 +179,5 @@ Hardware Version : {Colors.BOLD}{hameg_device.send_await_resp("SYSTem:HARDware?"
         raise SystemExit
     
     hapmd_console_loop(hapmd_config,hameg_device,rotor_device)
-    measurement = measurement_loop(hapmd_config,hameg_device,rotor_device).to_csv("output.csv")
+    measurement = measurement_loop(hapmd_config,hameg_device,rotor_device).to_csv("output_"+datetime.now().strftime("%d/%m/%Y %H:%M:%S") + ".csv")
 
