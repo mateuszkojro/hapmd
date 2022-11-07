@@ -20,10 +20,10 @@ if __name__ == "__main__":
             f"Provided file must have extension '.csv' not '{data_file_path[-4:]}'"
         )
 
-    # load separator symbol 
+    # load separator symbol
     with open(data_file_path) as f:
         separator = f.read(1)
-    
+
     measurement: pd.DataFrame = pd.read_csv(data_file_path, sep=separator)
     measurement = measurement.set_index(measurement.columns[0])
 
@@ -42,16 +42,8 @@ if __name__ == "__main__":
     else:
         alpha = 0.6
 
-    ax.scatter(
-        0,
-        0,
-        alpha=0,
-    )
-    ax.scatter(
-        0,
-        -100,
-        alpha=0,
-    )
+    ax.scatter(0, 0, alpha=0)
+    ax.scatter(0, -100, alpha=0)
 
     measurement_index_as_radians = [math.radians(freq) for freq in measurement.index]
 
@@ -70,10 +62,9 @@ if __name__ == "__main__":
     for n, label in enumerate(ax.yaxis.get_ticklabels()):
         if n % (no_labels // 5) != 0:
             label.set_visible(False)
-                
+
     ax.yaxis.get_ticklabels()[-1].set_visible(True)
-    
-    
+
     (lines, labels) = plt.thetagrids(
         range(0, 360, 45), ("0°", "45°", "90°", "135°", "180°", "-135°", "-90°", "-45°")
     )
@@ -85,9 +76,7 @@ if __name__ == "__main__":
     # ax.text(np.radians(label_position+10),ax.get_rmax()/2.,'Antenna signal Strength [dB]',
     #     rotation=label_position,ha='center',va='center')
 
-
-    ax.set_title("Horizontal Antenna Pattern measurement for Frequency")
+    ax.set_title("Directivity (dB) at 0° elevation at different Frequencies")
     ax.legend(loc="lower right")
     # # display the Polar plot
     fig.savefig(data_file_path[:-4] + "_plot.pdf")
-    
