@@ -8,19 +8,23 @@ import sys
 
 if __name__ == "__main__":
 
-    hapmd_settings_file = None
+    data_file_path = None
 
     if len(sys.argv) == 2:
-        hapmd_settings_file = str(sys.argv[1])
+        data_file_path = str(sys.argv[1])
     else:
-        raise ValueError(f"Provided file: '{hapmd_settings_file}' is incorrect")
+        raise ValueError(f"Provided file: '{data_file_path}' is incorrect")
 
-    if hapmd_settings_file[-4:] != ".csv":
+    if data_file_path[-4:] != ".csv":
         raise ValueError(
-            f"Provided file must have extension '.csv' not '{hapmd_settings_file[-4:]}'"
+            f"Provided file must have extension '.csv' not '{data_file_path[-4:]}'"
         )
 
-    measurement: pd.DataFrame = pd.read_csv(hapmd_settings_file)
+    # load separator symbol 
+    with open(data_file_path) as f:
+        separator = f.read(1)
+    
+    measurement: pd.DataFrame = pd.read_csv(data_file_path, sep=separator)
     measurement = measurement.set_index(measurement.columns[0])
 
     plt.axes(
@@ -85,4 +89,5 @@ if __name__ == "__main__":
     ax.set_title("Horizontal Antenna Pattern measurement for Frequency")
     ax.legend(loc="lower right")
     # # display the Polar plot
-    fig.savefig(hapmd_settings_file[:-4] + "_plot.pdf")
+    fig.savefig(data_file_path[:-4] + "_plot.pdf")
+    

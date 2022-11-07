@@ -151,5 +151,5 @@ if __name__ == "__main__":
 
     hapmd_console_loop(hapmd_config, hameg_device, rotor_device)
     measurement = measurement_loop(hapmd_config, hameg_device, rotor_device).to_csv(
-        datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_apm.csv"
+        datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_apm.csv", sep = '\t'
     )
