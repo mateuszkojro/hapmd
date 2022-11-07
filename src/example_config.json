@@ -2,7 +2,9 @@
     "hameg_vid": 1027,
     "hameg_pid": 60786,
     "hameg_frequencies": [
-        1000000
+        1000000,
+        2000000,
+        2230000
     ],
     "rotor_com_port": "COM3",
     "rotor_min_angle": -110,
