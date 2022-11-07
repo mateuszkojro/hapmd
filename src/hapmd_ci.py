@@ -9,7 +9,7 @@ import pandas as pd
 
 from hameg3010.device import Device
 from hameg3010.device_mock import DeviceMock
-from hameg_scripts import level
+from hameg_scripts import get_level
 
 from rotor.arduino_connector import ArduinoConnector
 from rotor.arduino_connector_mock import ArduinoConnectorMock
@@ -49,13 +49,13 @@ def measurement_loop(
     rotor_handle: Union[ArduinoConnector, ArduinoConnectorMock],
 ) -> pd.DataFrame:
     print(
-        f"Measurement no Angle states: {(hapmd_config.rotor_max_angle -hapmd_config.rotor_min_angle) // hapmd_config.rotor_angle_step} no Frequency states: {len(frequencies)}"
+        f"Measurement no Angle states: {(hapmd_config.rotor_max_angle -hapmd_config.rotor_min_angle) // hapmd_config.rotor_angle_step} no Frequency states: {len(hapmd_config.hameg_frequencies)}"
     )
 
     measurement = []
     indexes = []
     angle = hapmd_config.rotor_min_angle
-    
+
     while angle <= hapmd_config.rotor_max_angle:
         angle = angle + hapmd_config.rotor_angle_step
         rotor_handle.move_to(angle)
@@ -63,13 +63,15 @@ def measurement_loop(
         sweep = []
         indexes.append(angle)
         print(f"current angle: {angle}")
-        
+
         for frequency in hapmd_config.hameg_frequencies:
-            sweep.append(level(hameg_device,frequency))
+            sweep.append(get_level(hameg_handle, frequency))
         measurement.append(sweep)
-        
-    measurement_df = pd.DataFrame(measurement, columns=hapmd_config.hameg_frequencies, index=indexes)
-    
+
+    measurement_df = pd.DataFrame(
+        measurement, columns=hapmd_config.hameg_frequencies, index=indexes
+    )
+
     return measurement_df
 
 
@@ -77,7 +79,7 @@ def set_up_hameg_device(
     hapmd_config: HapmdConfig,
 ) -> Optional[Union[Device, DeviceMock]]:
     try:
-        hameg_device = Device.connect_using_vid_pid(
+        hameg_device = DeviceMock.connect_using_vid_pid(
             hapmd_config.hameg_vid, hapmd_config.hameg_pid
         )
 
@@ -117,7 +119,7 @@ def set_up_rotor_device(
 
 
 if __name__ == "__main__":
-    
+
     hapmd_settings_file = None
     if len(sys.argv) == 2:
         hapmd_settings_file = str(sys.argv[1])
@@ -134,10 +136,12 @@ if __name__ == "__main__":
 |__/  |__/|__/  |__/|__/      |__/     |__/|_______/        \______/ |______/"""
     )
     print("Horizontal antenna pattern measurement device")
+
     if hapmd_settings_file:
         hapmd_config = HapmdConfig.from_json_config_file(hapmd_settings_file)
-    else:    
+    else:
         hapmd_config = HapmdConfig()
+
     hapmd_config.print_config()
     hameg_device = set_up_hameg_device(hapmd_config)
     rotor_device = set_up_rotor_device(hapmd_config)
@@ -147,5 +151,5 @@ if __name__ == "__main__":
 
     hapmd_console_loop(hapmd_config, hameg_device, rotor_device)
     measurement = measurement_loop(hapmd_config, hameg_device, rotor_device).to_csv(
-        "output_" + datetime.now().strftime("%d/%m/%Y %H:%M:%S") + ".csv"
+        datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_apm.csv"
     )
