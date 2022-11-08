@@ -8,12 +8,23 @@ import sys
 import argparse
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Generate Azimuth plot at elevation 0°"
+    )
+    parser.add_argument(
+        "path",
+        help="path to .csv file, containing the data for plot in correct format",
+        type=str,
+    )
+    parser.add_argument(
+        "--scale_plot",
+        "-s",
+        dest="scale",
+        help="if true, radius axis will be stretched between lowest and highest measured value",
+        type=bool,
+        default=False,
+    )
 
-
-    parser = argparse.ArgumentParser(description= "Generate Azimuth plot at elevation 0°")
-    parser.add_argument('path', help="path to .csv file, containing the data for plot in correct format", type=str)
-    parser.add_argument('--scale_plot','-s', dest='scale', help="if true, radius axis will be stretched between lowest and highest measured value", type= bool, default= False)
-    
     args = parser.parse_args()
     data_file_path = args.path
 
@@ -27,7 +38,7 @@ if __name__ == "__main__":
     plt.axes(
         projection="polar",
     )
-    
+
     fig = plt.figure()
     ax = fig.add_subplot(projection="polar")
     ax.set_theta_zero_location("N")
@@ -39,7 +50,7 @@ if __name__ == "__main__":
         alpha = 1
     else:
         alpha = 0.6
-        
+
     if not args.scale:
         ax.scatter(0, 0, alpha=0)
         ax.scatter(0, -100, alpha=0)

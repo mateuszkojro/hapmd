@@ -2,6 +2,7 @@
     entry point for application
 """
 
+import argparse
 import sys
 import datetime
 from typing import Optional, Union
@@ -120,9 +121,29 @@ def set_up_rotor_device(
 
 if __name__ == "__main__":
 
-    hapmd_settings_file = None
-    if len(sys.argv) == 2:
-        hapmd_settings_file = str(sys.argv[1])
+    parser = argparse.ArgumentParser(
+        description="Horizontal Antenna Pattern measurement device"
+    )
+    parser.add_argument(
+        "--path",
+        "-p",
+        dest="path",
+        help="path to .json file with configuration of device",
+        type=str,
+        required=False,
+        default=None,
+    )
+    parser.add_argument(
+        "--separator",
+        "-s",
+        dest="sep",
+        help="Separator symbol for .csv output, for easy compatibility with online excel use '\\t'",
+        required=False,
+        default=",",
+        type=str,
+    )
+
+    args = parser.parse_args()
 
     print(
         """ 
@@ -137,8 +158,8 @@ if __name__ == "__main__":
     )
     print("Horizontal antenna pattern measurement device")
 
-    if hapmd_settings_file:
-        hapmd_config = HapmdConfig.from_json_config_file(hapmd_settings_file)
+    if args.path:
+        hapmd_config = HapmdConfig.from_json_config_file(args.path)
     else:
         hapmd_config = HapmdConfig()
 
@@ -151,5 +172,5 @@ if __name__ == "__main__":
 
     hapmd_console_loop(hapmd_config, hameg_device, rotor_device)
     measurement = measurement_loop(hapmd_config, hameg_device, rotor_device).to_csv(
-        datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_apm.csv", sep = '\t'
+        datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + "_apm.csv", sep=args.sep
     )
