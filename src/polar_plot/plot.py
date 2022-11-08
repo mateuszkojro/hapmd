@@ -5,20 +5,17 @@ from matplotlib.pyplot import cm
 import pandas as pd
 import numpy as np
 import sys
+import argparse
 
 if __name__ == "__main__":
 
-    data_file_path = None
 
-    if len(sys.argv) == 2:
-        data_file_path = str(sys.argv[1])
-    else:
-        raise ValueError(f"Provided file: '{data_file_path}' is incorrect")
-
-    if data_file_path[-4:] != ".csv":
-        raise ValueError(
-            f"Provided file must have extension '.csv' not '{data_file_path[-4:]}'"
-        )
+    parser = argparse.ArgumentParser(description= "Generate Azimuth plot at elevation 0°")
+    parser.add_argument('path', help="path to .csv file, containing the data for plot in correct format", type=str)
+    parser.add_argument('--scale_plot','-s', dest='scale', help="if true, radius axis will be stretched between lowest and highest measured value", type= bool, default= False)
+    
+    args = parser.parse_args()
+    data_file_path = args.path
 
     # load separator symbol
     with open(data_file_path) as f:
@@ -30,6 +27,7 @@ if __name__ == "__main__":
     plt.axes(
         projection="polar",
     )
+    
     fig = plt.figure()
     ax = fig.add_subplot(projection="polar")
     ax.set_theta_zero_location("N")
@@ -41,9 +39,10 @@ if __name__ == "__main__":
         alpha = 1
     else:
         alpha = 0.6
-
-    ax.scatter(0, 0, alpha=0)
-    ax.scatter(0, -100, alpha=0)
+        
+    if not args.scale:
+        ax.scatter(0, 0, alpha=0)
+        ax.scatter(0, -100, alpha=0)
 
     measurement_index_as_radians = [math.radians(freq) for freq in measurement.index]
 
