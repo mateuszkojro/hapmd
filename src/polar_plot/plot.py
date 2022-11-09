@@ -21,8 +21,7 @@ if __name__ == "__main__":
         "-s",
         dest="scale",
         help="if true, radius axis will be stretched between lowest and highest measured value",
-        type=bool,
-        default=False,
+        action='store_const',
     )
 
     args = parser.parse_args()
