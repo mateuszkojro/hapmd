@@ -80,7 +80,7 @@ def set_up_hameg_device(
     hapmd_config: HapmdConfig,
 ) -> Optional[Union[Device, DeviceMock]]:
     try:
-        hameg_device = DeviceMock.connect_using_vid_pid(
+        hameg_device = Device.connect_using_vid_pid(
             hapmd_config.hameg_vid, hapmd_config.hameg_pid
         )
 
