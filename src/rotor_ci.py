@@ -46,7 +46,7 @@ if __name__ == "__main__":
           """
     )
     port: str = "COM3"
-    device = ArduinoConnectorMock.connect_on_port(port)
+    device = ArduinoConnector.connect_on_port(port)
     print("Arduino device set up: " + Colors.OKGREEN + Colors.BOLD + "OK" + Colors.ENDC)
     print(f"Connection Port: {Colors.BOLD}{port}{Colors.ENDC}")
     print(f"Current angle: {Colors.BOLD}{device.get_angle()}{Colors.ENDC}")
