@@ -45,10 +45,10 @@ public:
     {
         for (int i = 0; i < no_steps; i++)
         {
-            digitalWrite(step_pin, LOW);
             digitalWrite(step_pin, HIGH);
+            delayMicroseconds(1000);
             digitalWrite(step_pin, LOW);
-            delay(10);
+            delayMicroseconds(1000);
         }
     }
 
