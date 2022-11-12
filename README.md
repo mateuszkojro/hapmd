@@ -21,3 +21,9 @@ Horizontal antenna pattern measurement device
     - Run the experiment
     - Analyze and interpret results
 
+# Suppliers of components:
+  ### rs components
+  ### farnel
+  ### conrad 
+  ### botland
+  
