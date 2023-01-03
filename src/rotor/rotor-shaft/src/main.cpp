@@ -70,41 +70,37 @@
 // }
 
 #include <Arduino.h>
-const int dirPin = 8;
-const int stepPin = 6;
-const int stepsPerRevolution = 200;
+#include <Stepper.h>
+
+const int stepsPerRevolution = 48;
+
+Stepper myStepper(stepsPerRevolution, 11, 10, 9, 8);
 
 void setup()
 {
-  // Declare pins as Outputs
-  pinMode(stepPin, OUTPUT);
-  pinMode(dirPin, OUTPUT);
+
+  // set the speed at 60 rpm :
+  myStepper.setSpeed(60);
+
+  // initialize the serial port: Serial.begin(9600);
 }
+
 void loop()
 {
-  // Set motor direction clockwise
-  digitalWrite(dirPin, HIGH);
 
-  // Spin motor slowly
-  for (int x = 0; x < stepsPerRevolution; x++)
-  {
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(2000);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(2000);
-  }
-  delay(1000); // Wait a second
+  // step one revolution in one direction:
 
-  // Set motor direction counterclockwise
-  digitalWrite(dirPin, LOW);
+  Serial.println("clockwise");
 
-  // Spin motor quickly
-  for (int x = 0; x < stepsPerRevolution; x++)
-  {
-    digitalWrite(stepPin, HIGH);
-    delayMicroseconds(1000);
-    digitalWrite(stepPin, LOW);
-    delayMicroseconds(1000);
-  }
-  delay(1000); // Wait a second
+  myStepper.step(stepsPerRevolution);
+
+  delay(500);
+
+  // step one revolution in the other direction:
+
+  Serial.println("counterclockwise");
+
+  myStepper.step(-stepsPerRevolution);
+
+  delay(500);
 }
