@@ -84,11 +84,11 @@ class FrequencySetup(QWidget):
 
     @property
     def receive_freq(self):
-        self.received_spinbox.value()
+        return self.received_spinbox.value()
 
     @property
     def generate_freq(self):
-        self.generated_spinbox.value()
+        return self.generated_spinbox.value()
 
 
 class MainWindow(QMainWindow):
